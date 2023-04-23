@@ -41,5 +41,3 @@ yarn.lock
 .env.production.local
 
 # Ignore compiled JavaScript files
-**/*.js
-!**/src/**/*.js
