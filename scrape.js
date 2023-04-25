@@ -1,13 +1,7 @@
 const chromium = require("@sparticuz/chrome-aws-lambda");
 const { addExtra } = require("puppeteer-extra");
 const pluginStealth = require("puppeteer-extra-plugin-stealth");
-const {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc,
-  collection,
-} = require("firebase/firestore");
+const { getFirestore, doc, getDoc, setDoc, collection, } = require("firebase/firestore");
 const { app } = require("./initializeFirebase");
 const db = getFirestore(app);
 
@@ -24,7 +18,7 @@ const access_tokens = [
 const message_quota_per_account = 200;
 
 function getMessage(name = "friend") {
-  return `${name}! Saw you on the React Devs page. Seems like you're on the grind!!\n\nI figured I'd reach out personally. I just built an app that helps web devs get more clients.\n\nIt's in early access right now, so I'm only dropping it for a small group of legit developers.\n\nLet me know if you're interested! ( The site is scavng.com );`;
+  return `${name}! Saw you on the React Devs page. Seems like you're on the grind!!\n\nI figured I'd reach out personally. I just built an app that helps web devs get more clients.\n\nIt's in early access right now, so I'm only dropping it for a small group of legit developers.\n\nLet me know if you're interested! ( The site is scavng.com )`;
 }
 
 async function linkedinScraper(access_token, message_quota_per_account) {
@@ -107,7 +101,7 @@ async function linkedinScraper(access_token, message_quota_per_account) {
 
     await page.waitForSelector(".msg-form__contenteditable");
     await page.type(".msg-form__contenteditable", getMessage(firstName));
-    await page.click(".msg-form__send-button");
+    // await page.click(".msg-form__send-button");
     await page.waitForSelector(".msg-s-message-list");
     await page.waitForTimeout(1000);
 
