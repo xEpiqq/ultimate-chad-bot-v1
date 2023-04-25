@@ -93,20 +93,16 @@ async function linkedinScraper(access_token, message_quota_per_account) {
 
     // if the number_messaged = 0
     console.log(`number messaged: ${number_messaged}`)
-    // if (number_messaged == 0) { 
-    //     try {
-    //         // wait 4 seconds
-    //         await row.waitForSelector(".artdeco-button");
-    //         const button = await row.$(".artdeco-button");
-    //         await button.click();
-    //         await button.click();
-    //         await button.click();
-    //         await page.waitForTimeout(4000);
-    //     } catch (error) {
-    //         console.log("error");
-    //         continue
-    //     }
-    // }  else {
+    if (number_messaged == 0) { 
+        try {
+          await page.waitForTimeout(4000);
+          const button = await row.$(".artdeco-button");
+          await button.click();
+        } catch (error) {
+            console.log("error");
+            continue
+        }
+    }  else {
       try {
           const button = await row.$(".artdeco-button");
           await button.click();
@@ -114,12 +110,12 @@ async function linkedinScraper(access_token, message_quota_per_account) {
           console.log("error");
           continue;
       }
-    // } 
-
-
+    } 
 
     await page.waitForSelector(".msg-form__contenteditable");
+    await page.waitForTimeout(1000);
     await page.type(".msg-form__contenteditable", getMessage(firstName));
+    await page.waitForTimeout(500);
     await page.click(".msg-form__send-button");
     await page.waitForSelector(".msg-s-message-list");
     await page.waitForTimeout(1000);
