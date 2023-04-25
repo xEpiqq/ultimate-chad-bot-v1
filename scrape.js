@@ -5,20 +5,18 @@ const { getFirestore, doc, getDoc, setDoc, collection, } = require("firebase/fir
 const { app } = require("./initializeFirebase");
 const db = getFirestore(app);
 
-const url_id = "https://www.linkedin.com/groups/14048479/members/";
+const url_id = "https://www.linkedin.com/groups/13948955/members/";
 const groupId = url_id.match(/groups\/(\d+)\/members/)[1];
 
 const access_tokens = [
-    "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8",
-    "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8",
-    "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8",
-    "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8",
+  "AQEDAULpMa0ALvqqAAABh7alYMoAAAGH2rHkylYAldlGfBtWkGMYn24yX7FzhrQFAY5WP09krrmcFlXaRRjZ_sgu04dp83c-CEzRvPQIQ_NgR2rq33WxDb__seqOKzlzmxsugDPD8v3IPPJZBqNAiESO",
+  // "AQEDAS2vRC0FLffWAAABh7al9roAAAGH2rJ6ulYAIQ_YamljnqKsk1XW6KMqyQ2owvJ4lmmKaC3zzV8EgF6-Lsx55TeA9YzCuUn8WSVDRHIDNquMriDMh443yH5tPMzdvwl5-ePeqSQb4iISaiFR2N4w"
 ]
 
-const message_quota_per_account = 200;
+const message_quota_per_account = 162
 
 function getMessage(name = "friend") {
-  return `${name}! Saw you on the React Devs page. Seems like you're on the grind!!\n\nI figured I'd reach out personally. I just built an app that helps web devs get more clients.\n\nIt's in early access right now, so I'm only dropping it for a small group of legit developers.\n\nLet me know if you're interested! ( The site is scavng.com )`;
+  return `${name}! Saw you on the web devs page. Seems like you're on the grind!!\n\nI figured I'd reach out personally. I just built an app that helps web devs get more clients.\n\nIt's in early access right now, so I'm only dropping it for a small group of legit developers.\n\nLet me know if you're interested! ( The site is scavng.com )`;
 }
 
 async function linkedinScraper(access_token, message_quota_per_account) {
@@ -53,6 +51,7 @@ async function linkedinScraper(access_token, message_quota_per_account) {
 
   // find the number of members in the group
   await page.goto(url_id, { waitUntil: "networkidle2" });
+  await page.waitForSelector(".groups-members-list h1");
   const membersText = await page.$eval(
     ".groups-members-list h1",
     (el) => el.textContent
@@ -61,6 +60,7 @@ async function linkedinScraper(access_token, message_quota_per_account) {
 
   let number_messaged = 0;
   for (let i = 0; i < membersCount; i++) {
+    try {
     if (number_messaged >= message_quota_per_account) {
       break;
     }
@@ -78,7 +78,6 @@ async function linkedinScraper(access_token, message_quota_per_account) {
       await page.evaluate(() => {
         window.scrollTo(0, document.body.scrollHeight);
       });
-      await page.waitForTimeout(4000);
       await page.waitForSelector(".ui-entity-action-row");
       continue;
     }
@@ -91,17 +90,37 @@ async function linkedinScraper(access_token, message_quota_per_account) {
       continue;
     }
     // try-catch just in case the user is you, you dont have a message button
-    try {
-      const button = await row.$(".artdeco-button"); // find the button element inside the row
-      await button.click();
-    } catch (error) {
-      console.log("error");
-      continue;
-    }
+
+    // if the number_messaged = 0
+    console.log(`number messaged: ${number_messaged}`)
+    // if (number_messaged == 0) { 
+    //     try {
+    //         // wait 4 seconds
+    //         await row.waitForSelector(".artdeco-button");
+    //         const button = await row.$(".artdeco-button");
+    //         await button.click();
+    //         await button.click();
+    //         await button.click();
+    //         await page.waitForTimeout(4000);
+    //     } catch (error) {
+    //         console.log("error");
+    //         continue
+    //     }
+    // }  else {
+      try {
+          const button = await row.$(".artdeco-button");
+          await button.click();
+      } catch (error) {
+          console.log("error");
+          continue;
+      }
+    // } 
+
+
 
     await page.waitForSelector(".msg-form__contenteditable");
     await page.type(".msg-form__contenteditable", getMessage(firstName));
-    // await page.click(".msg-form__send-button");
+    await page.click(".msg-form__send-button");
     await page.waitForSelector(".msg-s-message-list");
     await page.waitForTimeout(1000);
 
@@ -121,6 +140,12 @@ async function linkedinScraper(access_token, message_quota_per_account) {
     number_messaged += 1;
 
     console.log(i);
+
+
+  } catch {
+    console.log("error");
+    continue;
+  }
   }
 
   await browser.close();
