@@ -7,9 +7,15 @@ const db = getFirestore(app);
 
 const url_id = "https://www.linkedin.com/groups/14048479/members/"
 const groupId = url_id.match(/groups\/(\d+)\/members/)[1];
-const LI_AT = "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8"
+const access_token_1 = "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8"
+const access_token_2 = "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8"
+const access_token_3 = "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8"
+const access_token_4 = "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8"
+const access_token_5 = "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8"
 
-async function linkedinScraper() {
+const message_quota_per_account = 2
+
+async function linkedinScraper(access_token, message_quota_per_account) {
     // see if group id document already exists and if not create it
     const userRef = doc(db, "linkedin-sent-messages", groupId)
     const userDoc = await getDoc(userRef)
@@ -31,7 +37,7 @@ async function linkedinScraper() {
 
     await page.setCookie({
         name: 'li_at',
-        value: LI_AT,
+        value: access_token,
         domain: 'www.linkedin.com',
         path: '/',
         expires: Date.now() + 1000 * 60 * 60 * 24 * 365
@@ -41,12 +47,14 @@ async function linkedinScraper() {
     await page.goto(url_id, { waitUntil: 'networkidle2' })
     const membersText = await page.$eval('.groups-members-list h1', el => el.textContent);
     const membersCount = parseInt(membersText.replace(/\D/g,'')); // extract only digits and convert to integer
-            // scroll down a little bit
-    await page.evaluate(() => {
-        window.scrollBy(0, 500);
-    });
 
+    let number_messaged = 0
     for (let i = 0; i < membersCount; i++) {
+
+        if (number_messaged >= message_quota_per_account) {
+            break;
+        }
+
         const newestUserDoc = await getDoc(userRef)
         const contactRows = await page.$$('.ui-entity-action-row');
         const row = contactRows[i]
@@ -58,13 +66,12 @@ async function linkedinScraper() {
             await page.evaluate(() => {
                 window.scrollTo(0, document.body.scrollHeight);
             });
-            await page.waitForTimeout(1000);
-            // wait for the new rows to load
+            await page.waitForTimeout(4000);
             await page.waitForSelector('.ui-entity-action-row');
             continue;
         }
-        const firstName = name.split(' ')[0];
 
+        const firstName = name.split(' ')[0];
         const href = await row.$eval('a', el => el.getAttribute('href'));
         const messagedArray = newestUserDoc.data().messaged;
         if (messagedArray.includes(href)) {
@@ -99,43 +106,20 @@ async function linkedinScraper() {
         const newHrefs = [...newestUserDoc.data().messaged, href]
         await setDoc(userRef, { messaged: newHrefs })
 
+        number_messaged += 1
+
         console.log(i);
       }
 
-
-   
-    // await browser.close();
+    await browser.close();
 }
 
-linkedinScraper();
+async function scraperLauncher() {
+    await linkedinScraper(access_token_1, message_quota_per_account);
+    await linkedinScraper(access_token_2, message_quota_per_account);
+    await linkedinScraper(access_token_3, message_quota_per_account);
+    await linkedinScraper(access_token_4, message_quota_per_account);
+    await linkedinScraper(access_token_5, message_quota_per_account);
+}
 
-// for (const row of contactRows) {
-//     // check if user is already in firebase and if so continue
-//     const href = await row.$eval('a', el => el.getAttribute('href'));
-//     const messagedArray = userDoc.data().messaged;
-//     if (messagedArray.includes(href)) {
-//         console.log(`Skipping user with href: ${href}`);
-//         continue;
-//     }
-//     // messaging logic
-//     const name = await row.$eval('.artdeco-entity-lockup__title', el => el.textContent.trim());
-//     const firstName = name.split(' ')[0];
-
-//     // just in case the user is you, you dont have a message button
-//         const button = await row.$('.artdeco-button'); // find the button element inside the row
-//         await button.click();
-
-//     await page.waitForSelector('.msg-form__contenteditable');
-//     // await page.type('.msg-form__contenteditable', `Hi ${firstName}, how are you doing?`);
-//     // await page.click('.msg-form__send-button');
-//     // await page.waitForSelector('.msg-s-message-list');
-//     await page.waitForTimeout(4000);
-
-//     // close the message window
-//     const closeIcon = await page.$('.msg-convo-wrapper li-icon[type="close"]');
-//     await closeIcon.click();
-//     await page.waitForTimeout(3000);
-
-//     const newHrefs = [...userDoc.data().messaged, href]
-//     await setDoc(userRef, { messaged: newHrefs })
-// }
+scraperLauncher()
