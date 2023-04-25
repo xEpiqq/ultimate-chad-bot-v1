@@ -13,16 +13,13 @@ const db = getFirestore(app);
 
 const url_id = "https://www.linkedin.com/groups/14048479/members/";
 const groupId = url_id.match(/groups\/(\d+)\/members/)[1];
-const access_token_1 =
-  "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8";
-const access_token_2 =
-  "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8";
-const access_token_3 =
-  "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8";
-const access_token_4 =
-  "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8";
-const access_token_5 =
-  "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8";
+
+const access_tokens = [
+    "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8",
+    "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8",
+    "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8",
+    "AQEDAS2vRC0DXh9iAAABh6YlgyoAAAGHyjIHKlYArAdsUf9SFyuTfdCNuhQ-s68JcyiZT7BQVfNduJvbaDyRkmjGXF2bSPfiMKzkxNCW4iSHctkjDx-Q22lBECwPh601WoxTXGau16PS8UJ7cZKdfxJ8",
+]
 
 const message_quota_per_account = 200;
 
@@ -136,11 +133,9 @@ async function linkedinScraper(access_token, message_quota_per_account) {
 }
 
 async function scraperLauncher() {
-  await linkedinScraper(access_token_1, message_quota_per_account);
-  //await linkedinScraper(access_token_2, message_quota_per_account);
-  //await linkedinScraper(access_token_3, message_quota_per_account);
-  //await linkedinScraper(access_token_4, message_quota_per_account);
-  //await linkedinScraper(access_token_5, message_quota_per_account);
+    for (let i = 0; i < access_tokens.length; i++) {
+        await linkedinScraper(access_tokens[i], message_quota_per_account);
+    }
 }
 
 scraperLauncher();
