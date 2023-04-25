@@ -121,8 +121,8 @@ async function linkedinScraper(access_token, message_quota_per_account) {
       input.innerText = message;
     }, message);
 
-    await page.type(".msg-form__contenteditable", "");
-
+    // await page.type(".msg-form__contenteditable", "");
+    await page.focus('.msg-form__contenteditable');
 
     await page.waitForTimeout(500);
     await page.click(".msg-form__send-button");
