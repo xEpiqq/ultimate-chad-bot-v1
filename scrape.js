@@ -116,13 +116,10 @@ async function linkedinScraper(access_token, message_quota_per_account) {
     await page.waitForTimeout(1000);
 
     const message = getMessage(firstName);
-    await page.evaluate((message) => {
-      const input = document.querySelector('.msg-form__contenteditable');
-      input.innerText = message;
-    }, message);
-
     // await page.type(".msg-form__contenteditable", "");
+
     await page.focus('.msg-form__contenteditable');
+    await page.keyboard.type(message, { delay: 1 });
 
     await page.waitForTimeout(500);
     await page.click(".msg-form__send-button");
