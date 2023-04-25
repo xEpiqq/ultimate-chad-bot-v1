@@ -114,7 +114,15 @@ async function linkedinScraper(access_token, message_quota_per_account) {
 
     await page.waitForSelector(".msg-form__contenteditable");
     await page.waitForTimeout(1000);
-    await page.type(".msg-form__contenteditable", getMessage(firstName));
+    // await page.type(".msg-form__contenteditable", getMessage(firstName));
+
+    const message = getMessage(firstName);
+    await page.evaluate((message) => {
+      const input = document.querySelector('.msg-form__contenteditable');
+      input.innerText = message;
+    }, message);
+
+
     await page.waitForTimeout(500);
     await page.click(".msg-form__send-button");
     await page.waitForSelector(".msg-s-message-list");
